@@ -47,7 +47,9 @@ DB_LASER = {
     "ZINCOR": {
                     0.5: ("11041095035", "CHAPA ELETROZINCADA ESP. 0,50MM"),
                     1.5: ("11041095036", "CHAPA ELETROZINCADA ESP. 1,50MM"),
-                    2.0: ("11041095037", "CHAPA ELETROZINCADA ESP. 2,00MM")}
+                    2.0: ("11041095037", "CHAPA ELETROZINCADA ESP. 2,00MM"),
+                    3.0: ("11041095038", "CHAPA ELETROZINCADA ESP. 3,00MM")
+    }
 }
 
 st.title("🛡️ Portal de Conversão Laser")
