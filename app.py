@@ -4,7 +4,7 @@ import io
 import os
 
 # Configuração da página
-st.set_page_config(page_title="Importador Laser Pro", page_icon="🚀")
+st.set_page_config(page_title="Importador Laser", page_icon="⚙")
 
 # Esconder menus (Blindagem)
 st.markdown("<style>#MainMenu {visibility: hidden;} footer {visibility: hidden;}</style>", unsafe_allow_html=True)
@@ -108,4 +108,4 @@ if arquivo_laser:
         
         buffer = io.BytesIO()
         df_final.to_excel(buffer, index=False, engine='xlsxwriter')
-        st.download_button("💾 Descarregar para PHC", buffer.getvalue(), "importacao_of.xlsx")
+        st.download_button("💾 Descarregar para PHC", buffer.getvalue(), "importacao_phc_revisto.xlsx")
