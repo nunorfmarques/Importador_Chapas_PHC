@@ -82,6 +82,11 @@ if arquivo_laser:
         if pd.notna(limite) and s >= limite: break
         try:
             shp_ref = str(df.iloc[s+2, 13]).strip()
+            nome_real = dict_nomes.get(shp_ref)
+            if pd.isna(nome_real) or str(nome_real).strip() == "" or nome_real is None:
+                nome_final = shp_ref  # Mantém o SHP original para rastreabilidade
+            else:
+                nome_final = str(nome_real).strip()
             material = str(df.iloc[s+6, 13]).upper()
             qtd = int(float(str(df.iloc[s+7, 37]).replace(',', '.')))
             esp = float(str(df.iloc[s+9, 40]).replace(',', '.'))
