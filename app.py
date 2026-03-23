@@ -93,12 +93,10 @@ if arquivo_laser:
             peso_raw = df.iloc[s+11, 40]
             peso_phc = "{:.3f}".format(float(str(peso_raw).replace(',', '.'))).replace('.', ',')
 
-            # SUBSTITUIÇÃO AUTOMÁTICA (VLOOKUP INTERNO)
-            nome_final = dict_nomes.get(shp_ref, shp_ref)
-
             # Lógica de Material
             if "275" in material: grupo = "S275JR"
             elif "GALV" in material: grupo = "GALVANIZADO"
+            elif "ZINC" in material or "ELETRO" in material: grupo = "ZINCOR"
             else: grupo = "S235JR"
             
             ref_phc, des_phc = DB_LASER.get(grupo, {}).get(esp, ("⚠️ NÃO MAP.", f"{grupo} {esp}mm"))
