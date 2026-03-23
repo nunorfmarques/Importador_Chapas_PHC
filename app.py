@@ -1,19 +1,25 @@
 import streamlit as st
 import pandas as pd
 import io
+import os
 
-# Configuração da página e estilo visual
-st.set_page_config(page_title="Conversor Laser PHC", page_icon="⚙️")
+# Configuração da página
+st.set_page_config(page_title="Importador Laser Pro", page_icon="🚀")
 
-# CSS para esconder menus do Streamlit e profissionalizar o aspeto
-st.markdown("""
-    <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    .stApp { background-color: #f8f9fa; }
-    </style>
-    """, unsafe_allow_html=True)
+# Esconder menus (Blindagem)
+st.markdown("<style>#MainMenu {visibility: hidden;} footer {visibility: hidden;}</style>", unsafe_allow_html=True)
+
+# --- 1. CARREGAR DICIONÁRIO SHP (DO GITHUB) ---
+@st.cache_data # Isto faz com que o ficheiro só seja lido uma vez, ficando rápido
+def carregar_base_dados():
+    caminho = "base_dados_shp.xls" # Nome exato do ficheiro no teu GitHub
+    if os.path.exists(caminho):
+        df_db = pd.read_excel(caminho, header=None)
+        # Cria o mapeamento: Coluna 0 (SHP) -> Coluna 1 (Nome Real)
+        return pd.Series(df_db.iloc[:, 1].values, index=df_db.iloc[:, 0].values).to_dict()
+    return {}
+
+dict_nomes = carregar_base_dados()
 
 # DICIONÁRIO MESTRE (O teu banco de dados de referências)
 DB_LASER = {
@@ -59,49 +65,47 @@ DB_LASER = {
     }
 }
 
-st.title("🛡️ Portal de Conversão Laser")
-st.info("Carregue o relatório PE original para gerar o ficheiro de importação PHC.")
+st.title("🛡️ Portal de Importação Laser")
+st.info("A base de dados de peças foi carregada automaticamente do sistema.")
 
-arquivo = st.file_uploader("Arraste o ficheiro .xls aqui", type=["xls", "xlsx"])
+# --- 2. UPLOAD DO RELATÓRIO DO LASER ---
+arquivo_laser = st.file_uploader("Selecione o relatório PE (.xls)", type=["xls", "xlsx"])
 
-if arquivo:
-    df = pd.read_excel(arquivo, header=None)
+if arquivo_laser:
+    df = pd.read_excel(arquivo_laser, header=None)
     
-    # Lógica de Paragem e Extração (Offsets V4.1)
     limite = df[df.apply(lambda r: r.astype(str).str.contains('TOTAIS DA CHAPA').any(), axis=1)].index.min()
     starts = df[df.apply(lambda r: r.astype(str).str.contains('DADOS DE PEÇA').any(), axis=1)].index.tolist()
     
-    final_rows = []
+    final_data = []
     for s in starts:
         if pd.notna(limite) and s >= limite: break
         try:
-            peca_ref = str(df.iloc[s+2, 13]).strip()
+            shp_ref = str(df.iloc[s+2, 13]).strip()
             material = str(df.iloc[s+6, 13]).upper()
             qtd = int(float(str(df.iloc[s+7, 37]).replace(',', '.')))
             esp = float(str(df.iloc[s+9, 40]).replace(',', '.'))
             peso_raw = df.iloc[s+11, 40]
             peso_phc = "{:.3f}".format(float(str(peso_raw).replace(',', '.'))).replace('.', ',')
 
-            # Mapeamento
-            grupo = "S275JR" if "275" in material else ("GALVANIZADO" if "GALV" in material else ("ZINCOR" if "ZINC" in material or "ELETRO" in material else "S235JR"))
-            ref_phc, des_phc = DB_LASER.get(grupo, {}).get(esp, ("⚠️ NÃO MAPEADO", f"{grupo} {esp}mm"))
+            # SUBSTITUIÇÃO AUTOMÁTICA (VLOOKUP INTERNO)
+            nome_final = dict_nomes.get(shp_ref, shp_ref)
+
+            # Lógica de Material
+            if "275" in material: grupo = "S275JR"
+            elif "GALV" in material: grupo = "GALVANIZADO"
+            else: grupo = "S235JR"
             
-            final_rows.append([ref_phc, des_phc, peca_ref, qtd, "und", "0,000", peso_phc])
+            ref_phc, des_phc = DB_LASER.get(grupo, {}).get(esp, ("⚠️ NÃO MAP.", f"{grupo} {esp}mm"))
+            
+            final_data.append([ref_phc, des_phc, nome_final, qtd, "und", "0,000", peso_phc])
         except: continue
 
-    if final_rows:
-        df_final = pd.DataFrame(final_rows, columns=['Ref', 'Design', 'Peca', 'Qtt', 'Unidade', 'preco', 'peso'])
-        st.success(f"Foram encontradas {len(df_final)} peças prontas para importação.")
+    if final_data:
+        df_final = pd.DataFrame(final_data, columns=['Ref', 'Design', 'Peca', 'Qtt', 'Unidade', 'preco', 'peso'])
+        st.success("✅ Processamento concluído!")
         st.dataframe(df_final, use_container_width=True)
         
-        # Conversão para Excel em memória
         buffer = io.BytesIO()
-        with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-            df_final.to_excel(writer, index=False)
-        
-        st.download_button(
-            label="💾 Descarregar Ficheiro para o PHC",
-            data=buffer.getvalue(),
-            file_name="importar_phc.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+        df_final.to_excel(buffer, index=False, engine='xlsxwriter')
+        st.download_button("💾 Descarregar para PHC", buffer.getvalue(), "importacao_of.xlsx")
