@@ -86,45 +86,71 @@ st.info("A base de dados de peças foi carregada automaticamente do sistema.")
 # --- 2. UPLOAD DO RELATÓRIO DO LASER ---
 arquivo_laser = st.file_uploader("Selecione o relatório PE (.xls)", type=["xls", "xlsx"])
 
-if arquivo_laser:
-    df = pd.read_excel(arquivo_laser, header=None)
-    
-    limite = df[df.apply(lambda r: r.astype(str).str.contains('TOTAIS DA CHAPA').any(), axis=1)].index.min()
-    starts = df[df.apply(lambda r: r.astype(str).str.contains('DADOS DE PEÇA').any(), axis=1)].index.tolist()
-    
-    final_data = []
-    for s in starts:
-        if pd.notna(limite) and s >= limite: break
-        try:
-            shp_ref = str(df.iloc[s+2, 13]).strip()
-            nome_real = dict_nomes.get(shp_ref)
-            if pd.isna(nome_real) or str(nome_real).strip() == "" or nome_real is None:
-                nome_final = shp_ref  # Mantém o SHP original para rastreabilidade
-            else:
-                nome_final = str(nome_real).strip()
-            material = str(df.iloc[s+6, 13]).upper()
-            qtd = int(float(str(df.iloc[s+7, 37]).replace(',', '.')))
-            esp = float(str(df.iloc[s+9, 40]).replace(',', '.'))
-            peso_raw = df.iloc[s+11, 40]
-            peso_phc = "{:.3f}".format(float(str(peso_raw).replace(',', '.'))).replace('.', ',')
+if arquivos_laser:
+    arquivos_processados = {}
 
-            # Lógica de Material
-            if "275" in material: grupo = "S275JR"
-            elif "INOX" in material: grupo = "INOX"
-            elif "GALV" in material: grupo = "GALVANIZADO"
-            elif "ZINC" in material or "ELETRO" in material: grupo = "ZINCOR"
-            else: grupo = "S235JR"
-            
-            ref_phc, des_phc = DB_LASER.get(grupo, {}).get(esp, ("⚠️ NÃO MAP.", f"{grupo} {esp}mm"))
-            
-            final_data.append([ref_phc, des_phc, nome_final, qtd, "und", "0,000", peso_phc])
-        except: continue
-
-    if final_data:
-        df_final = pd.DataFrame(final_data, columns=['Ref', 'Design', 'Peca', 'Qtt', 'Unidade', 'preco', 'peso'])
-        st.success("✅ Processamento concluído!")
-        st.dataframe(df_final, use_container_width=True)
+    for arquivo_laser in arquivos_laser:
+        df = pd.read_excel(arquivo_laser, header=None)
         
-        buffer = io.BytesIO()
-        df_final.to_excel(buffer, index=False, engine='xlsxwriter')
-        st.download_button("💾 Descarregar para PHC", buffer.getvalue(), "importacao_phc_revisto.xlsx")
+        limite = df[df.apply(lambda r: r.astype(str).str.contains('TOTAIS DA CHAPA').any(), axis=1)].index.min()
+        starts = df[df.apply(lambda r: r.astype(str).str.contains('DADOS DE PEÇA').any(), axis=1)].index.tolist()
+        
+        final_data = []
+        for s in starts:
+            if pd.notna(limite) and s >= limite: break
+            try:
+                shp_ref = str(df.iloc[s+2, 13]).strip()
+                nome_real = dict_nomes.get(shp_ref)
+                if pd.isna(nome_real) or str(nome_real).strip() == "" or nome_real is None:
+                    nome_final = shp_ref  # Mantém o SHP original para rastreabilidade
+                else:
+                    nome_final = str(nome_real).strip()
+                material = str(df.iloc[s+6, 13]).upper()
+                qtd = int(float(str(df.iloc[s+7, 37]).replace(',', '.')))
+                esp = float(str(df.iloc[s+9, 40]).replace(',', '.'))
+                peso_raw = df.iloc[s+11, 40]
+                peso_phc = "{:.3f}".format(float(str(peso_raw).replace(',', '.'))).replace('.', ',')
+    
+                # Lógica de Material
+                if "275" in material: grupo = "S275JR"
+                elif "INOX" in material: grupo = "INOX"
+                elif "GALV" in material: grupo = "GALVANIZADO"
+                elif "ZINC" in material or "ELETRO" in material: grupo = "ZINCOR"
+                else: grupo = "S235JR"
+                
+                ref_phc, des_phc = DB_LASER.get(grupo, {}).get(esp, ("⚠️ NÃO MAP.", f"{grupo} {esp}mm"))
+                
+                final_data.append([ref_phc, des_phc, nome_final, qtd, "und", "0,000", peso_phc])
+            except: continue
+
+       if final_data:
+                df_final = pd.DataFrame(final_data, columns=['Ref', 'Design', 'Peca', 'Qtt', 'Unidade', 'preco', 'peso'])
+                
+                # Formatação do nome do ficheiro gerado
+                nome_original = os.path.splitext(arquivo_laser.name)[0]
+                nome_novo_ficheiro = f"{nome_original}_Importação_PHC.xlsx"
+                
+                buffer = io.BytesIO()
+                df_final.to_excel(buffer, index=False, engine='xlsxwriter')
+                
+                # Guardamos o ficheiro processado na nossa lista
+                arquivos_processados[nome_novo_ficheiro] = buffer.getvalue()
+                
+                # Mostramos no ecrã que este ficheiro específico já foi
+                with st.expander(f"✅ Visualizar dados processados: {nome_novo_ficheiro}"):
+                    st.dataframe(df_final, use_container_width=True)
+    
+        # --- 3. LÓGICA DE DOWNLOAD (ÚNICO VS MÚLTIPLO) ---
+        if len(arquivos_processados) == 1:
+            # Se for só 1 ficheiro, fazemos o download direto do .xlsx
+            nome_ficheiro, dados = list(arquivos_processados.items())[0]
+            st.download_button("💾 Descarregar para PHC", dados, nome_ficheiro)
+            
+        elif len(arquivos_processados) > 1:
+            # Se for mais de 1, criamos o pacote .zip
+            zip_buffer = io.BytesIO()
+            with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+                for nome_ficheiro, dados in arquivos_processados.items():
+                    zip_file.writestr(nome_ficheiro, dados)
+                    
+            st.download_button("🗂️ Descarregar Todos (Pacote ZIP)", zip_buffer.getvalue(), "Importacoes_PHC.zip", mime="application/zip")
