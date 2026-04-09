@@ -140,17 +140,17 @@ if arquivos_laser:
             with st.expander(f"✅ Visualizar dados processados: {nome_novo_ficheiro}"):
                 st.dataframe(df_final, use_container_width=True)
     
-        # --- 3. LÓGICA DE DOWNLOAD (ÚNICO VS MÚLTIPLO) ---
-        if len(arquivos_processados) == 1:
-            # Se for só 1 ficheiro, fazemos o download direto do .xlsx
-            nome_ficheiro, dados = list(arquivos_processados.items())[0]
-            st.download_button("💾 Descarregar para PHC", dados, nome_ficheiro)
-            
-        elif len(arquivos_processados) > 1:
-            # Se for mais de 1, criamos o pacote .zip
-            zip_buffer = io.BytesIO()
-            with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
-                for nome_ficheiro, dados in arquivos_processados.items():
-                    zip_file.writestr(nome_ficheiro, dados)
-                    
-            st.download_button("🗂️ Descarregar Todos (Pacote ZIP)", zip_buffer.getvalue(), "Importacoes_PHC.zip", mime="application/zip")
+    # --- 3. LÓGICA DE DOWNLOAD (ÚNICO VS MÚLTIPLO) ---
+    if len(arquivos_processados) == 1:
+        # Se for só 1 ficheiro, fazemos o download direto do .xlsx
+        nome_ficheiro, dados = list(arquivos_processados.items())[0]
+        st.download_button("💾 Descarregar para PHC", dados, nome_ficheiro)
+        
+    elif len(arquivos_processados) > 1:
+        # Se for mais de 1, criamos o pacote .zip
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            for nome_ficheiro, dados in arquivos_processados.items():
+                zip_file.writestr(nome_ficheiro, dados)
+                
+        st.download_button("🗂️ Descarregar Todos (Pacote ZIP)", zip_buffer.getvalue(), "Importacoes_PHC.zip", mime="application/zip")
