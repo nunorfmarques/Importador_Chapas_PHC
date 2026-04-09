@@ -84,7 +84,7 @@ st.title("🛡️ Portal de Importação Laser")
 st.info("A base de dados de peças foi carregada automaticamente do sistema.")
 
 # --- 2. UPLOAD DO RELATÓRIO DO LASER ---
-arquivo_laser = st.file_uploader("Selecione o relatório PE (.xls)", type=["xls", "xlsx"])
+arquivos_laser = st.file_uploader("Selecione os relatório PE (.xls)", type=["xls", "xlsx"], accept_multiple_files=True)
 
 if arquivos_laser:
     arquivos_processados = {}
