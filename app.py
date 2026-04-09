@@ -123,7 +123,7 @@ if arquivos_laser:
                 final_data.append([ref_phc, des_phc, nome_final, qtd, "und", "0,000", peso_phc])
             except: continue
 
-       if final_data:
+        if final_data:
             df_final = pd.DataFrame(final_data, columns=['Ref', 'Design', 'Peca', 'Qtt', 'Unidade', 'preco', 'peso'])
             
             # Formatação do nome do ficheiro gerado
