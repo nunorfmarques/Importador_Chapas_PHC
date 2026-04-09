@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import io
 import os
+import zipfile
 
 # Configuração da página
 st.set_page_config(page_title="Importador Laser", page_icon="⚙")
