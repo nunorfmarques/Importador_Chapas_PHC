@@ -124,21 +124,21 @@ if arquivos_laser:
             except: continue
 
        if final_data:
-                df_final = pd.DataFrame(final_data, columns=['Ref', 'Design', 'Peca', 'Qtt', 'Unidade', 'preco', 'peso'])
-                
-                # Formatação do nome do ficheiro gerado
-                nome_original = os.path.splitext(arquivo_laser.name)[0]
-                nome_novo_ficheiro = f"{nome_original}_Importação_PHC.xlsx"
-                
-                buffer = io.BytesIO()
-                df_final.to_excel(buffer, index=False, engine='xlsxwriter')
-                
-                # Guardamos o ficheiro processado na nossa lista
-                arquivos_processados[nome_novo_ficheiro] = buffer.getvalue()
-                
-                # Mostramos no ecrã que este ficheiro específico já foi
-                with st.expander(f"✅ Visualizar dados processados: {nome_novo_ficheiro}"):
-                    st.dataframe(df_final, use_container_width=True)
+            df_final = pd.DataFrame(final_data, columns=['Ref', 'Design', 'Peca', 'Qtt', 'Unidade', 'preco', 'peso'])
+            
+            # Formatação do nome do ficheiro gerado
+            nome_original = os.path.splitext(arquivo_laser.name)[0]
+            nome_novo_ficheiro = f"{nome_original}_Importação_PHC.xlsx"
+            
+            buffer = io.BytesIO()
+            df_final.to_excel(buffer, index=False, engine='xlsxwriter')
+            
+            # Guardamos o ficheiro processado na nossa lista
+            arquivos_processados[nome_novo_ficheiro] = buffer.getvalue()
+            
+            # Mostramos no ecrã que este ficheiro específico já foi
+            with st.expander(f"✅ Visualizar dados processados: {nome_novo_ficheiro}"):
+                st.dataframe(df_final, use_container_width=True)
     
         # --- 3. LÓGICA DE DOWNLOAD (ÚNICO VS MÚLTIPLO) ---
         if len(arquivos_processados) == 1:
