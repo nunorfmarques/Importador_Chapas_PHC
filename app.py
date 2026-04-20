@@ -140,8 +140,8 @@ if arquivos_laser:
     
                 # Lógica de Material
                 if "275" in material: grupo = "S275JR"
-                elif "S355JR" in material: grupo = "INOX"
-                elif "S355J2" in material: grupo = "INOX"
+                elif "S355JR" in material: grupo = "S355JR"
+                elif "S355J2" in material: grupo = "S355J2"
                 elif "INOX" in material: grupo = "INOX"
                 elif "GALV" in material: grupo = "GALVANIZADO"
                 elif "ZINC" in material or "ELETRO" in material: grupo = "ZINCOR"
