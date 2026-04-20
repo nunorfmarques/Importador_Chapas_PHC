@@ -53,6 +53,32 @@ DB_LASER = {
                 40.0: ("011041012027", "CHAPA LAMINADA A QUENTE LISA ESP. 40,00MM S275 JR EN 10025"),
                 50.0: ("011041012028", "CHAPA LAMINADA A QUENTE LISA ESP. 50,00MM S275 JR EN 10025")
             },    
+
+    "S355JR": {
+                    2.0: ("011041013012", "CHAPA LAMINADA A QUENTE LISA ESP. 2,00MM S355 JR EN 10025"),
+                    2.5: ("011041013013", "CHAPA LAMINADA A QUENTE LISA ESP. 2,50MM S355 JR EN 10025"),
+                    3.0: ("011041013014", "CHAPA LAMINADA A QUENTE LISA ESP. 3,00MM S355 JR EN 10025"),
+                    4.0: ("011041013015", "CHAPA LAMINADA A QUENTE LISA ESP. 4,00MM S355 JR EN 10025"),
+                    5.0: ("011041013016", "CHAPA LAMINADA A QUENTE LISA ESP. 5,00MM S355 JR EN 10025"),
+                    6.0: ("011041013017", "CHAPA LAMINADA A QUENTE LISA ESP. 6,00MM S355 JR EN 10025"),
+                    8.0: ("011041013018", "CHAPA LAMINADA A QUENTE LISA ESP. 8,00MM S355 JR EN 10025"),
+                    10.0: ("011041013019", "CHAPA LAMINADA A QUENTE LISA ESP. 10,00MM S355 JR EN 10025"),
+                    12.0: ("011041013020", "CHAPA LAMINADA A QUENTE LISA ESP. 12,00MM S355 JR EN 10025"),
+                    15.0: ("011041013021", "CHAPA LAMINADA A QUENTE LISA ESP. 15,00MM S355 JR EN 10025"),
+                    16.0: ("011041013022", "CHAPA LAMINADA A QUENTE LISA ESP. 16,00MM S355 JR EN 10025"),
+                    18.0: ("011041013023", "CHAPA LAMINADA A QUENTE LISA ESP. 18,00MM S355 JR EN 10025"),
+                    20.0: ("011041013024", "CHAPA LAMINADA A QUENTE LISA ESP. 20,00MM S355 JR EN 10025"),
+                    25.0: ("011041013025", "CHAPA LAMINADA A QUENTE LISA ESP. 25,00MM S355 JR EN 10025"),
+                    30.0: ("011041013026", "CHAPA LAMINADA A QUENTE LISA ESP. 30,00MM S355 JR EN 10025"),
+                    40.0: ("011041013027", "CHAPA LAMINADA A QUENTE LISA ESP. 40,00MM S355 JR EN 10025"),
+                    50.0: ("011041013028", "CHAPA LAMINADA A QUENTE LISA ESP. 50,00MM S355 JR EN 10025")    
+                },
+    "S355J2": {
+                5.0: ("011041013029", "CHAPA LAMINADA A QUENTE LISA ESP. 5MM S355 J2+AR EN 10025"),
+                10.0: ("011041013030", "CHAPA LAMINADA A QUENTE LISA ESP. 10MM S355 J2+AR"),
+                15.0: ("011041013031", "CHAPA LAMINADA A QUENTE LISA ESP. 15MM S355 J2+AR"),
+                20.0: ("011041013032", "CHAPA LAMINADA A QUENTE LISA ESP. 20,00MM S355 JR EN 10025")
+            },
   
     "GALVANIZADO": {
                     1.5: ("011041031017", "CHAPA GALVANIZADA LISA ESP. 1,50MM DX51D EN 10327"),
@@ -114,6 +140,8 @@ if arquivos_laser:
     
                 # Lógica de Material
                 if "275" in material: grupo = "S275JR"
+                elif "S355JR" in material: grupo = "INOX"
+                elif "S355J2" in material: grupo = "INOX"
                 elif "INOX" in material: grupo = "INOX"
                 elif "GALV" in material: grupo = "GALVANIZADO"
                 elif "ZINC" in material or "ELETRO" in material: grupo = "ZINCOR"
