@@ -13,7 +13,7 @@ st.markdown("<style>#MainMenu {visibility: hidden;} footer {visibility: hidden;}
 # --- 1. CARREGAR DICIONÁRIO SHP (DO GITHUB) ---
 @st.cache_data # Isto faz com que o ficheiro só seja lido uma vez, ficando rápido
 def carregar_base_dados():
-    caminho = "base_dados_shp.xls" # Nome exato do ficheiro no teu GitHub
+    caminho = "base_dados_shp.xlsx" # Nome exato do ficheiro no teu GitHub
     if os.path.exists(caminho):
         df_db = pd.read_excel(caminho, header=None)
         # Cria o mapeamento: Coluna 0 (SHP) -> Coluna 1 (Nome Real)
